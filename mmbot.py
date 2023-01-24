@@ -36,16 +36,15 @@ async def on_error(ctx):
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-dd-mm 형식)", time ="마지막 체크인 시간(hh:mm 형식)")
 async def setUser(interaction: discord.Interaction, day_num: int, date:str, time:str):
-  #입력값 형식 체크
+  #일수, 날짜, 시간 입력값 형식 체크
   if day_num < 0 : 
-    await interaction.response.send_message(f"{day_num}(X) 양수 값을 입력해주세요.")
-    return
-  if not bool(re.match(r"^\d{2}-\d{2}-\d{2}$", date)) :
-    await interaction.response.send_message(f"{date}(X) 날짜를 yy-dd-mm 형식으로 입력해주세요.")
-    return
-  if not bool(re.match(r"^\d{2}:\d{2}$", time)) :
-    await interaction.response.send_message(f"{time}(X) 시간을 hh:mm 형식으로 입력해주세요.")
-    return
+    return await interaction.response.send_message(f"{day_num}(X) 양수 값을 입력해주세요.")
+  msg_date = checkVal("date", date)
+  if msg_date :
+    return await interaction.response.send_message(msg_date)
+  msg_time = checkVal("time", time)
+  if msg_time :
+    return await interaction.response.send_message(msg_time)
   #체크인 설정값 저장 및 출력
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
@@ -70,11 +69,11 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   if mem_dic[userId]["checkIn_date"] == date : 
     await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
     return
-  #입력값 형식 체크
+  #시간 입력값 형식 체크
   if time == None: time = getTime()
-  if not bool(re.match(r"^\d{2}:\d{2}$", time)) :
-    await interaction.response.send_message(f"{time}(X) 시간을 hh:mm 형식으로 입력해주세요.")
-    return
+  msg_time = checkVal("time", time)
+  if msg_time : 
+    return await interaction.response.send_message(msg_time)
   #체크인 정보 저장 및 출력
   mem_dic[userId]["checkIn_days"] += 1
   mem_dic[userId]["checkIn_date"] = date
@@ -99,11 +98,11 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
     await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
     return
-  #입력값 형식 체크
+  #시간 입력값 형식 체크
   if time == None: time = getTime()
-  if not bool(re.match(r"^\d{2}:\d{2}$", time)) :
-    await interaction.response.send_message(f"{time}(X) 시간을 hh:mm 형식으로 입력해주세요.")
-    return
+  msg_time = checkVal("time", time)
+  if msg_time :
+    return await interaction.response.send_message(msg_time)
   #체류 시간 구하기
   checkIn_time = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["checkIn_time"], "%y-%m-%d %H:%M")
   checkOut_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")
@@ -165,10 +164,22 @@ def getMedal(day_num : int):
   return medal
 
 def checkVal(type:str, value:str):
+  #날짜 체크
   if type=="date":
-    print("")
-  elif type=="time":
-    print("")
+    if not bool(re.match(r"^\d{2}-\d{2}-\d{2}$", value)) :
+      return f"{value}(X) 날짜를 yy-dd-mm 형식으로 입력해주세요."
+    dNum = value.split("-")
+    if int(dNum[1])<0 or int(dNum[1])>12 or int(dNum[2])<0 or int(dNum[2])>31:
+      return f"{value}(X) 범위 내의 날짜를 입력해주세요."
+  #시간 체크
+  if type=="time":
+    if not bool(re.match(r"^\d{2}:\d{2}$", value)) :
+      return f"{value}(X) 시간을 hh:mm 형식으로 입력해주세요."
+    tNum = value.split(":")
+    if int(tNum[0])<0 or int(tNum[0])>23 or int(tNum[1])<0 or  int(tNum[1])>59 :
+      return f"{value}(X) 범위 내의 시간을 입력해주세요."
+  #정상 입력
+  return None
 
 def saveRemote():
   try:
