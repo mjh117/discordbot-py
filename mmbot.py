@@ -118,12 +118,34 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
 
 @bot.command()
 async def save(ctx):
+  #봇관리자만 가능
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
   #로컬에 json 파일 백업
   with open(backup_file, "wt", encoding="utf-8") as fp :
     json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
   #저장소에 json 파일 백업
-  msg = saveRemote()
-  await ctx.send(msg)
+  await ctx.send(saveRemote())
+
+@bot.command()
+async def member(ctx):
+  sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
+  strTmp = "순위 | 누적 일수(마지막 출석일) | 이름\n"
+  for i, mem in enumerate(sorted_list):
+    strTmp += f'{i+1:02d} | {mem["checkIn_days"]}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
+  await ctx.send(strTmp)
+
+@bot.command()
+async def today(ctx):
+  tmp_list =[]
+  for memdata in mem_dic.values() :
+    if memdata['checkIn_date'] == '11': #getDate():
+      tmp_list.append(memdata)
+  sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
+  strTmp = "순위 | 시간 | 이름(누적 일수)\n"
+  for i, mem in enumerate(sorted_list):
+    strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({mem["checkIn_days"]}일 차)\n'
+  await ctx.send(strTmp)
 
 def getTime():
   tz = datetime.timezone(datetime.timedelta(hours=9))
@@ -141,6 +163,12 @@ def getMedal(day_num : int):
   elif day_num<66 : medal = ":first_place:"
   elif day_num>=66 : medal = ":medal:"
   return medal
+
+def checkVal(type:str, value:str):
+  if type=="date":
+    print("")
+  elif type=="time":
+    print("")
 
 def saveRemote():
   try:
