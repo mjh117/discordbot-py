@@ -54,7 +54,7 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
     day_num = 1
   mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
   print("set data ::" , mem_dic[userId])
-  await interaction.response.send_message(f"Setting Completed : {medal}{userName} `{time}` **{day_num}**일 차 ({date})")
+  await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{day_num}**일 차 ({date})")
 
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력")
@@ -91,29 +91,29 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력")
 async def checkOut(interaction: discord.Interaction, time: str = None):
-    userId = str(interaction.user.id)
-    userName = interaction.user.display_name
-    #오늘 체크인 데이터 없는 사람 거르기
-    cur_date = getDate()
-    if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
-      await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
-      return
-    #입력값 형식 체크
-    if time == None: time = getTime()
-    if not bool(re.match(r"^\d{2}:\d{2}$", time)) :
-      await interaction.response.send_message(f"{time}(X) 시간을 hh:mm 형식으로 입력해주세요.")
-      return
-    #체류 시간 구하기
-    checkIn_time = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["checkIn_time"], "%y-%m-%d %H:%M")
-    checkOut_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")
-    if(checkIn_time>checkOut_time) : 
-      await interaction.response.send_message(f"{time}(X) 체크인 이후의 시간을 입력해주세요.")
-    stay_delta = checkOut_time-checkIn_time
-    stay_time = str(datetime.timedelta(seconds=stay_delta.seconds))
-    #체크아웃 정보 출력
-    day_num = mem_dic[userId]["checkIn_days"]
-    medal = mem_dic[userId]["medal"]
-    await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차 ({stay_time[:-3]} 체류)")
+  userId = str(interaction.user.id)
+  userName = interaction.user.display_name
+  #오늘 체크인 데이터 없는 사람 거르기
+  cur_date = getDate()
+  if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
+    await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
+    return
+  #입력값 형식 체크
+  if time == None: time = getTime()
+  if not bool(re.match(r"^\d{2}:\d{2}$", time)) :
+    await interaction.response.send_message(f"{time}(X) 시간을 hh:mm 형식으로 입력해주세요.")
+    return
+  #체류 시간 구하기
+  checkIn_time = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["checkIn_time"], "%y-%m-%d %H:%M")
+  checkOut_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")
+  if(checkIn_time>checkOut_time) : 
+    await interaction.response.send_message(f"{time}(X) 체크인 이후의 시간을 입력해주세요.")
+  stay_delta = checkOut_time-checkIn_time
+  stay_time = str(datetime.timedelta(seconds=stay_delta.seconds))
+  #체크아웃 정보 출력
+  day_num = mem_dic[userId]["checkIn_days"]
+  medal = mem_dic[userId]["medal"]
+  await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차 ({stay_time[:-3]} 체류)")
 
 @bot.command()
 async def save(ctx):
