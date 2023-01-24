@@ -122,15 +122,8 @@ async def save(ctx):
   with open(backup_file, "wt", encoding="utf-8") as fp :
     json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
   #저장소에 json 파일 백업
-  url = GIT_URL
-  headers = {'Authorization': 'Bearer ' + GIT_AUTH}
-  content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
-  r = requests.get(url, headers=headers)
-  sha = r.json()['sha']
-  now = getDate() + " " + getTime()
-  r = requests.put(url, json={'message': f'Backup {backup_file}({now})', 'sha': sha, 'content':content}, headers=headers)
-  print("[save data]status :", r.status_code)
-  await ctx.send(f"Saved Data of {len(mem_dic)} Members")
+  msg = saveRemote()
+  await ctx.send(msg)
 
 def getTime():
   tz = datetime.timezone(datetime.timedelta(hours=9))
@@ -148,5 +141,25 @@ def getMedal(day_num : int):
   elif day_num<66 : medal = ":first_place:"
   elif day_num>=66 : medal = ":medal:"
   return medal
+
+def saveRemote():
+  try:
+    url = GIT_URL
+    headers = {'Authorization': 'Bearer ' + GIT_AUTH}
+    content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
+    r = requests.get(url, headers=headers)
+    sha = r.json()['sha']
+    now = getDate() + " " + getTime()
+    r = requests.put(url, json={'message': f'Backup {backup_file}({now})', 'sha': sha, 'content':content}, headers=headers)
+    status = r.status_code
+    if status == 200:
+      msg= f"[{status}]Saved Data of {len(mem_dic)} Members"
+    else :
+      msg = f"[{status}]Faild to save data in remote"
+  except Exception as e:
+    print(e)
+    msg = f"[except]Faild to save data in remote({e})"
+  finally:
+    return msg
 
 bot.run(TOKEN_TEST)
