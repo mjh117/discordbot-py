@@ -12,10 +12,10 @@ intents = discord.Intents.default()
 intents = discord.Intents.all()
 #intents.members = True
 #intents.message_content = True
-backup_file = "mem_file.json"
-
 bot = commands.Bot(command_prefix='!', intents=intents)
+
 #체크인 데이터 읽어오기
+backup_file = "mem_file.json"
 with open(backup_file, "rt", encoding="utf-8") as fp:
   mem_dic = json.load(fp)
   print(f"Total number of members: {len(mem_dic)}")
@@ -29,8 +29,9 @@ async def on_ready():
     print(e)
 
 @bot.event
-async def on_error(ctx):
-  save(ctx)
+async def on_disconnect():
+  msg = saveRemote()
+  print("[on_disconnect]", msg)
   print("The bot has disconnected from the Discord server.")
 
 @bot.tree.command(name="set")
@@ -49,7 +50,7 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
   medal = getMedal(day_num)
-  if userName=='Key':
+  if userId=='941581845194240001':
     medal = ':sparkles:'
     day_num = 1
   mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
@@ -80,13 +81,15 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   mem_dic[userId]["checkIn_time"] = time
   day_num = mem_dic[userId]["checkIn_days"]
   #메달 지정 및 특정 유저 처리
+  mentionStr=""
   if(day_num==10 or day_num==30 or day_num==66) :
     mem_dic[userId]["medal"] = getMedal(day_num)
-  if userName=='Key':
+    mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
+  if userId=='941581845194240001':
     mem_dic[userId]["medal"] = ':sparkles:'
     day_num = mem_dic[userId]["checkIn_days"] = 1
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal}{userName} in `{time}` {day_num}일 차 ({date})")
+  await interaction.response.send_message(f"{medal}{userName} in `{time}` {day_num}일 차 ({date}) {mentionStr}")
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력")
@@ -138,7 +141,7 @@ async def member(ctx):
 async def today(ctx):
   tmp_list =[]
   for memdata in mem_dic.values() :
-    if memdata['checkIn_date'] == '11': #getDate():
+    if memdata['checkIn_date'] == getDate():
       tmp_list.append(memdata)
   sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
   strTmp = "순위 | 시간 | 이름(누적 일수)\n"
@@ -182,6 +185,7 @@ def checkVal(type:str, value:str):
   return None
 
 def saveRemote():
+  #깃헙 백업
   try:
     url = GIT_URL
     headers = {'Authorization': 'Bearer ' + GIT_AUTH}
