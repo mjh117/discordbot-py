@@ -3,6 +3,7 @@
 
 ###local file###
 mmbot_local.py
+mem_file_local.json
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
