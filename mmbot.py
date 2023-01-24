@@ -51,7 +51,7 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time}
   print("set data ::" , mem_dic[userId])
   medal = getMedal(day_num)
-  await interaction.response.send_message(f"Setting Completed: {medal}{userName} `{time}` **{day_num}**일 차 ({date})")
+  await interaction.response.send_message(f"Setting Completed:\n{medal}{userName} `{time}` **{day_num}**일 차 ({date})")
 
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력")
