@@ -12,10 +12,11 @@ intents = discord.Intents.default()
 intents = discord.Intents.all()
 #intents.members = True
 #intents.message_content = True
+backup_file = "mem_file.json"
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 #체크인 데이터 읽어오기
-with open("mem_file.json", "rt", encoding="utf-8") as fp:
+with open(backup_file, "rt", encoding="utf-8") as fp:
   mem_dic = json.load(fp)
   print(f"Total number of members: {len(mem_dic)}")
 
@@ -118,16 +119,16 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
 @bot.command()
 async def save(ctx):
   #로컬에 json 파일 백업
-  with open("mem_file.json", "wt", encoding="utf-8") as fp :
-    json.dump(mem_dic, fp)
+  with open(backup_file, "wt", encoding="utf-8") as fp :
+    json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
   #저장소에 json 파일 백업
   url = GIT_URL
   headers = {'Authorization': 'Bearer ' + GIT_AUTH}
-  content = base64.b64encode(json.dumps(mem_dic).encode()).decode()
+  content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
   r = requests.get(url, headers=headers)
   sha = r.json()['sha']
   now = getDate() + " " + getTime()
-  r = requests.put(url, json={'message': f'Backup mem_file.json({now})', 'sha': sha, 'content':content}, headers=headers)
+  r = requests.put(url, json={'message': f'Backup {backup_file}({now})', 'sha': sha, 'content':content}, headers=headers)
   print("[save data]status :", r.status_code)
   await ctx.send(f"Saved Data of {len(mem_dic)} Members")
 
