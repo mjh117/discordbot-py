@@ -48,10 +48,13 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   #체크인 설정값 저장 및 출력
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
-  mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time}
-  print("set data ::" , mem_dic[userId])
   medal = getMedal(day_num)
-  await interaction.response.send_message(f"Setting Completed:\n{medal}{userName} `{time}` **{day_num}**일 차 ({date})")
+  if userName=='Key':
+    medal = ':sparkles:'
+    day_num = 1
+  mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
+  print("set data ::" , mem_dic[userId])
+  await interaction.response.send_message(f"Setting Completed : {medal}{userName} `{time}` **{day_num}**일 차 ({date})")
 
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력")
@@ -60,7 +63,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   userName = interaction.user.display_name
   #새 멤버 추가
   if userId not in mem_dic:
-    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00"}
+    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ":third_place:"}
   #중복 출첵 막기
   date = getDate()
   if mem_dic[userId]["checkIn_date"] == date : 
@@ -76,7 +79,13 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   mem_dic[userId]["checkIn_date"] = date
   mem_dic[userId]["checkIn_time"] = time
   day_num = mem_dic[userId]["checkIn_days"]
-  medal = getMedal(day_num)
+  #메달 지정 및 특정 유저 처리
+  if(day_num==10 or day_num==30 or day_num==66) :
+    mem_dic[userId]["medal"] = getMedal(day_num)
+  if userName=='Key':
+    mem_dic[userId]["medal"] = ':sparkles:'
+    day_num = mem_dic[userId]["checkIn_days"] = 1
+  medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal}{userName} in `{time}` {day_num}일 차 ({date})")
 
 @bot.tree.command(name="out")
@@ -103,8 +112,8 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
     stay_time = str(datetime.timedelta(seconds=stay_delta.seconds))
     #체크아웃 정보 출력
     day_num = mem_dic[userId]["checkIn_days"]
-    medal = getMedal(day_num)
-    await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차({stay_time[:-3]} 체류)")
+    medal = mem_dic[userId]["medal"]
+    await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차 ({stay_time[:-3]} 체류)")
 
 @bot.command()
 async def save(ctx):
@@ -119,7 +128,7 @@ async def save(ctx):
   sha = r.json()['sha']
   now = getDate() + " " + getTime()
   r = requests.put(url, json={'message': f'Backup mem_file.json({now})', 'sha': sha, 'content':content}, headers=headers)
-  print("status :", r.status_code)
+  print("[save data]status :", r.status_code)
   await ctx.send(f"Saved Data of {len(mem_dic)} Members")
 
 def getTime():
@@ -133,7 +142,7 @@ def getDate():
   return cur_date
 
 def getMedal(day_num : int):
-  if day_num>0 and day_num<10 :  medal = ":third_place:"
+  if day_num<10 :  medal = ":third_place:"
   elif day_num<30 : medal = ":second_place:"
   elif day_num<66 : medal = ":first_place:"
   elif day_num>=66 : medal = ":medal:"
