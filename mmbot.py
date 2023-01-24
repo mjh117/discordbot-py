@@ -86,7 +86,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
     userName = interaction.user.display_name
     #오늘 체크인 데이터 없는 사람 거르기
     cur_date = getDate()
-    if userId not in mem_dic or mem_dic[userId]["checkIn_date"]!=cur_date :
+    if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
       await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
       return
     #입력값 형식 체크
