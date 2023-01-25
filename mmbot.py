@@ -4,8 +4,9 @@ from discord.ext import commands
 import datetime, json, re, os, requests, base64
 from generalFunc import *
 
-TOKEN_TEST = os.environ['TOKEN_TEST']
-TOKEN_MIMO = os.environ['TOKEN_MIMO']
+#로컬 환경변수 -> TEST 서버 토큰
+#원격 환경변수 -> MIMO 서버 토큰
+TOKEN_DICO = os.environ['TOKEN_DICO'] 
 
 intents = discord.Intents.default()
 intents = discord.Intents.all()
@@ -24,6 +25,9 @@ async def on_ready():
   try:
     synced = await bot.tree.sync()
     print(f"Synced {len(synced)} command(s)")
+    print("Servers of which the bot is a member ::")
+    for guild in bot.guilds:
+      print(guild.name)
   except Exception as e:
     print(e)
 
@@ -179,4 +183,4 @@ async def delMemData(ctx, userId:str):
     del mem_dic[userId]
     return await ctx.send(f"{userId} Member data Deleted(Current Members: {len(mem_dic)})")
 
-bot.run(TOKEN_MIMO)
+bot.run(TOKEN)
