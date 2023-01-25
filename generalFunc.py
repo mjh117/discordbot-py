@@ -35,10 +35,13 @@ def checkVal(type:str, value:str):
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
   return None
 
-def saveRemote(data : dict):
+def saveLocal(fname :str, mem_dic : dict):
+  with open(fname, "wt", encoding="utf-8") as fp :
+    json.dump(mem_dic, fp, indent=4, ensure_ascii=False)  
+
+def saveRemote(mem_dic : dict):
   #깃헙 백업
   try:
-    mem_dic = data
     url = GIT_URL
     headers = {'Authorization': 'Bearer ' + GIT_AUTH}
     content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()

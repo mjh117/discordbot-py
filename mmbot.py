@@ -29,9 +29,14 @@ async def on_ready():
 
 @bot.event
 async def on_disconnect():
-  msg = saveRemote()
-  print("[on_disconnect]", msg)
-  print("The bot has disconnected from the Discord server.")
+  try:
+    saveLocal(backup_file, mem_dic)
+    msg = saveRemote(mem_dic)
+    print("[on_disconnect|saveRemote]", msg)
+  except Exception as e:
+    print("[on_disconnect|except]",e)
+  finally:
+    print("The bot has disconnected from the Discord server.")
 
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식|ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식|ex.05:30)")
@@ -122,8 +127,7 @@ async def save(ctx):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
   #로컬에 json 파일 백업
-  with open(backup_file, "wt", encoding="utf-8") as fp :
-    json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
+  saveLocal(backup_file, mem_dic)
   #저장소에 json 파일 백업
   await ctx.send(saveRemote(mem_dic))
 
