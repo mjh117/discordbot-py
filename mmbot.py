@@ -154,4 +154,4 @@ async def reset(ctx):
   mem_dic.clear()
   await ctx.send(f"Reset Completed : {mem_dic}")
 
-bot.run(TOKEN_TEST)
+bot.run(TOKEN_MIMO)
