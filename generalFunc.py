@@ -48,7 +48,7 @@ def saveRemote(mem_dic : dict):
     content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
     r = requests.get(url, headers=headers)
     sha = r.json()['sha']
-    now = getDate() + " " + getTime()
+    now = getDate() + " " + getTime() +" | "+ len(mem_dic)
     r = requests.put(url, json={'message': f'Backup json file({now})', 'sha': sha, 'content':content}, headers=headers)
     status = r.status_code
     if status == 200:
