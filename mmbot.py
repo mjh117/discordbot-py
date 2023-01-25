@@ -34,7 +34,7 @@ async def on_disconnect():
   print("The bot has disconnected from the Discord server.")
 
 @bot.tree.command(name="set")
-@app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-dd-mm 형식)", time ="마지막 체크인 시간(hh:mm 형식)")
+@app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식|ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식|ex.05:30)")
 async def setUser(interaction: discord.Interaction, day_num: int, date:str, time:str):
   #일수, 날짜, 시간 입력값 형식 체크
   if day_num < 0 : 

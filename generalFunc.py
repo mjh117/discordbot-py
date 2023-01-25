@@ -23,13 +23,13 @@ def getMedal(day_num : int):
 def checkVal(type:str, value:str):
   if type=="date":
     if not bool(re.match(r"^\d{2}-\d{2}-\d{2}$", value)) :
-      return f"{value}(X) 날짜를 yy-dd-mm 형식으로 입력해주세요."
+      return f"{value}(X) 날짜를 yy-mm-dd 형식(ex.23-01-15)으로 입력해주세요."
     dNum = value.split("-")
     if int(dNum[1])<0 or int(dNum[1])>12 or int(dNum[2])<0 or int(dNum[2])>31:
       return f"{value}(X) 범위 내의 날짜를 입력해주세요."
   if type=="time":
     if not bool(re.match(r"^\d{2}:\d{2}$", value)) :
-      return f"{value}(X) 시간을 hh:mm 형식으로 입력해주세요."
+      return f"{value}(X) 시간을 hh:mm(ex.05:30) 형식으로 입력해주세요."
     tNum = value.split(":")
     if int(tNum[0])<0 or int(tNum[0])>23 or int(tNum[1])<0 or  int(tNum[1])>59 :
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
