@@ -6,8 +6,6 @@ from generalFunc import *
 
 TOKEN_TEST = os.environ['TOKEN_TEST']
 TOKEN_MIMO = os.environ['TOKEN_MIMO']
-GIT_AUTH = os.environ['GIT_AUTH']
-GIT_URL = os.environ['GIT_URL']
 
 intents = discord.Intents.default()
 intents = discord.Intents.all()
@@ -127,7 +125,7 @@ async def save(ctx):
   with open(backup_file, "wt", encoding="utf-8") as fp :
     json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
   #저장소에 json 파일 백업
-  await ctx.send(saveRemote())
+  await ctx.send(saveRemote(mem_dic))
 
 @bot.command()
 async def member(ctx):
@@ -148,5 +146,12 @@ async def today(ctx):
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({mem["checkIn_days"]}일 차)\n'
   await ctx.send(strTmp)
+
+@bot.command()
+async def reset(ctx):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  mem_dic.clear()
+  await ctx.send(f"Reset Completed : {mem_dic}")
 
 bot.run(TOKEN_TEST)

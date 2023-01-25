@@ -1,4 +1,7 @@
-import datetime, json, re, requests, base64
+import datetime, json, os, re, requests, base64
+
+GIT_AUTH = os.environ['GIT_AUTH']
+GIT_URL = os.environ['GIT_URL']
 
 def getTime():
   tz = datetime.timezone(datetime.timedelta(hours=9))
@@ -32,16 +35,17 @@ def checkVal(type:str, value:str):
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
   return None
 
-def saveRemote():
+def saveRemote(data : dict):
   #깃헙 백업
   try:
+    mem_dic = data
     url = GIT_URL
     headers = {'Authorization': 'Bearer ' + GIT_AUTH}
     content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
     r = requests.get(url, headers=headers)
     sha = r.json()['sha']
     now = getDate() + " " + getTime()
-    r = requests.put(url, json={'message': f'Backup {backup_file}({now})', 'sha': sha, 'content':content}, headers=headers)
+    r = requests.put(url, json={'message': f'Backup json file({now})', 'sha': sha, 'content':content}, headers=headers)
     status = r.status_code
     if status == 200:
       msg= f"[{status}]Saved Data of {len(mem_dic)} Members"
