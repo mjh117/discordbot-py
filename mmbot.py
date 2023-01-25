@@ -56,10 +56,10 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   medal = getMedal(day_num)
   if userId=='941581845194240001':
     medal = ':sparkles:'
-    day_num = 1
+    day_num = -1
   mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
   print("set data ::" , mem_dic[userId])
-  await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{day_num}**일 차 ({date})")
+  await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{abs(day_num)}**일 차 ({date})")
 
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력")
@@ -90,9 +90,9 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
   if userId=='941581845194240001':
     mem_dic[userId]["medal"] = ':sparkles:'
-    day_num = mem_dic[userId]["checkIn_days"] = 1
+    day_num = mem_dic[userId]["checkIn_days"] = -1
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal}{userName} in `{time}` {day_num}일 차 ({date}) {mentionStr}")
+  await interaction.response.send_message(f"{medal}{userName} in `{time}` {abs(day_num)}일 차 ({date}) {mentionStr}")
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력")
@@ -118,7 +118,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   #체크아웃 정보 출력
   day_num = mem_dic[userId]["checkIn_days"]
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차 ({stay_time[:-3]} 체류)")
+  await interaction.response.send_message(f"{medal}{userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
 
 
 ####봇관리자 전용 명령
@@ -136,7 +136,7 @@ async def member(ctx):
   sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
   strTmp = "순위 | 누적 일수(마지막 출석일) | 이름\n"
   for i, mem in enumerate(sorted_list):
-    strTmp += f'{i+1:02d} | {mem["checkIn_days"]:02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
+    strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
   await ctx.send(strTmp)
 
 @bot.command()
@@ -148,7 +148,7 @@ async def today(ctx):
   sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
   strTmp = "순위 | 시간 | 이름(누적 일수)\n"
   for i, mem in enumerate(sorted_list):
-    strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({mem["checkIn_days"]}일 차)\n'
+    strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(mem["checkIn_days"])}일 차)\n'
   await ctx.send(strTmp)
 
 @bot.command()
