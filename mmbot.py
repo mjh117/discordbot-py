@@ -159,4 +159,18 @@ async def delDataAll(ctx):
   mem_dic.clear()
   await ctx.send(f"{numData} Members data Deleted : {mem_dic}")
 
+@bot.command()
+async def setDataForce(ctx, userId:str, key:str, val:str, valType:str="s"):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  if valType=="i" : val = int(val)
+  mem_dic[userId][key] = val
+  await ctx.send(f"Setting Completed : {mem_dic[userId]}")
+
+@bot.command()
+async def viewMemData(ctx, userId:str):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  await ctx.send(f"View specific member data : {mem_dic[userId]}")
+
 bot.run(TOKEN_MIMO)
