@@ -152,10 +152,11 @@ async def today(ctx):
   await ctx.send(strTmp)
 
 @bot.command()
-async def reset(ctx):
+async def delDataAll(ctx):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
+  numData = len(mem_dic)
   mem_dic.clear()
-  await ctx.send(f"Reset Completed : {mem_dic}")
+  await ctx.send(f"{numData} Members data Deleted : {mem_dic}")
 
 bot.run(TOKEN_MIMO)
