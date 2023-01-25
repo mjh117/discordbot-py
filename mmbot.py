@@ -183,4 +183,4 @@ async def delMemData(ctx, userId:str):
     del mem_dic[userId]
     return await ctx.send(f"{userId} Member data Deleted(Current Members: {len(mem_dic)})")
 
-bot.run(TOKEN)
+bot.run(TOKEN_DICO)
