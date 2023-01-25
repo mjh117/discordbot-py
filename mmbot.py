@@ -132,7 +132,7 @@ async def member(ctx):
   sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
   strTmp = "순위 | 누적 일수(마지막 출석일) | 이름\n"
   for i, mem in enumerate(sorted_list):
-    strTmp += f'{i+1:02d} | {mem["checkIn_days"]}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
+    strTmp += f'{i+1:02d} | {mem["checkIn_days"]:02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
   await ctx.send(strTmp)
 
 @bot.command()
