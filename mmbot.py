@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import datetime, json, re, os, requests, base64
+from generalFunc import *
 
 TOKEN_TEST = os.environ['TOKEN_TEST']
 TOKEN_MIMO = os.environ['TOKEN_MIMO']
@@ -68,8 +69,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   #중복 출첵 막기
   date = getDate()
   if mem_dic[userId]["checkIn_date"] == date : 
-    await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
-    return
+    return await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
   #시간 입력값 형식 체크
   if time == None: time = getTime()
   msg_time = checkVal("time", time)
@@ -99,8 +99,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   #오늘 체크인 데이터 없는 사람 거르기
   cur_date = getDate()
   if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
-    await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
-    return
+    return await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
   #시간 입력값 형식 체크
   if time == None: time = getTime()
   msg_time = checkVal("time", time)
@@ -118,9 +117,10 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal}{userName} out `{time}` {day_num}일 차 ({stay_time[:-3]} 체류)")
 
+
+####봇관리자 전용 명령
 @bot.command()
 async def save(ctx):
-  #봇관리자만 가능
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
   #로컬에 json 파일 백업
@@ -148,61 +148,5 @@ async def today(ctx):
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({mem["checkIn_days"]}일 차)\n'
   await ctx.send(strTmp)
-
-def getTime():
-  tz = datetime.timezone(datetime.timedelta(hours=9))
-  cur_time = datetime.datetime.now(tz=tz).strftime('%H:%M')
-  return cur_time
-
-def getDate():
-  tz = datetime.timezone(datetime.timedelta(hours=9))
-  cur_date = datetime.datetime.now(tz=tz).strftime('%y-%m-%d')
-  return cur_date
-
-def getMedal(day_num : int):
-  if day_num<10 :  medal = ":third_place:"
-  elif day_num<30 : medal = ":second_place:"
-  elif day_num<66 : medal = ":first_place:"
-  elif day_num>=66 : medal = ":medal:"
-  return medal
-
-def checkVal(type:str, value:str):
-  #날짜 체크
-  if type=="date":
-    if not bool(re.match(r"^\d{2}-\d{2}-\d{2}$", value)) :
-      return f"{value}(X) 날짜를 yy-dd-mm 형식으로 입력해주세요."
-    dNum = value.split("-")
-    if int(dNum[1])<0 or int(dNum[1])>12 or int(dNum[2])<0 or int(dNum[2])>31:
-      return f"{value}(X) 범위 내의 날짜를 입력해주세요."
-  #시간 체크
-  if type=="time":
-    if not bool(re.match(r"^\d{2}:\d{2}$", value)) :
-      return f"{value}(X) 시간을 hh:mm 형식으로 입력해주세요."
-    tNum = value.split(":")
-    if int(tNum[0])<0 or int(tNum[0])>23 or int(tNum[1])<0 or  int(tNum[1])>59 :
-      return f"{value}(X) 범위 내의 시간을 입력해주세요."
-  #정상 입력
-  return None
-
-def saveRemote():
-  #깃헙 백업
-  try:
-    url = GIT_URL
-    headers = {'Authorization': 'Bearer ' + GIT_AUTH}
-    content = base64.b64encode(json.dumps(mem_dic, indent=4, ensure_ascii=False).encode()).decode()
-    r = requests.get(url, headers=headers)
-    sha = r.json()['sha']
-    now = getDate() + " " + getTime()
-    r = requests.put(url, json={'message': f'Backup {backup_file}({now})', 'sha': sha, 'content':content}, headers=headers)
-    status = r.status_code
-    if status == 200:
-      msg= f"[{status}]Saved Data of {len(mem_dic)} Members"
-    else :
-      msg = f"[{status}]Faild to save data in remote"
-  except Exception as e:
-    print(e)
-    msg = f"[except]Faild to save data in remote({e})"
-  finally:
-    return msg
 
 bot.run(TOKEN_TEST)
