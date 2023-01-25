@@ -53,10 +53,9 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   #체크인 설정값 저장 및 출력
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
-  medal = getMedal(day_num)
   if userId=='941581845194240001':
-    medal = ':sparkles:'
     day_num = -1
+  medal = getMedal(day_num)
   mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
   print("set data ::" , mem_dic[userId])
   await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{abs(day_num)}**일 차 ({date})")
@@ -66,9 +65,10 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
 async def checkIn(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
+  isNewMem = userId not in mem_dic # True->NewMem, False->OldMem
   #새 멤버 추가
-  if userId not in mem_dic:
-    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ":third_place:"}
+  if isNewMem:
+    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
   #중복 출첵 막기
   date = getDate()
   if mem_dic[userId]["checkIn_date"] == date : 
@@ -82,15 +82,17 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   mem_dic[userId]["checkIn_days"] += 1
   mem_dic[userId]["checkIn_date"] = date
   mem_dic[userId]["checkIn_time"] = time
+  #특정 유저 처리
+  if userId== '941581845194240001':
+    mem_dic[userId]["checkIn_days"] = -1
+  #새 멤버 메달 지정 및 상장 수여자 메달 변경
   day_num = mem_dic[userId]["checkIn_days"]
-  #메달 지정 및 특정 유저 처리
   mentionStr=""
-  if(day_num==10 or day_num==30 or day_num==66) :
+  if(isNewMem or day_num==10 or day_num==30 or day_num==66) :
     mem_dic[userId]["medal"] = getMedal(day_num)
-    mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
-  if userId=='941581845194240001':
-    mem_dic[userId]["medal"] = ':sparkles:'
-    day_num = mem_dic[userId]["checkIn_days"] = -1
+    if not isNewMem :
+      mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
+  #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal}{userName} in `{time}` {abs(day_num)}일 차 ({date}) {mentionStr}")
 

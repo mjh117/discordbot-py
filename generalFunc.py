@@ -14,7 +14,8 @@ def getDate():
   return cur_date
 
 def getMedal(day_num : int):
-  if day_num<10 :  medal = ":third_place:"
+  if day_num== -1 : medal = ':sparkles:'
+  elif day_num>=0 and day_num<10 :  medal = ":third_place:"
   elif day_num<30 : medal = ":second_place:"
   elif day_num<66 : medal = ":first_place:"
   elif day_num>=66 : medal = ":medal:"
