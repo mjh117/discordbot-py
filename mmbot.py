@@ -154,25 +154,29 @@ async def today(ctx):
   await ctx.send(strTmp)
 
 @bot.command()
-async def delDataAll(ctx):
-  if "bot-manager" not in [r.name for r in ctx.author.roles]:
-    return await ctx.send("You do not have permission to use this command.")
-  numData = len(mem_dic)
-  mem_dic.clear()
-  await ctx.send(f"{numData} Members data Deleted : {mem_dic}")
-
-@bot.command()
-async def setDataForce(ctx, userId:str, key:str, val:str, valType:str="s"):
-  if "bot-manager" not in [r.name for r in ctx.author.roles]:
-    return await ctx.send("You do not have permission to use this command.")
-  if valType=="i" : val = int(val)
-  mem_dic[userId][key] = val
-  await ctx.send(f"Setting Completed : {mem_dic[userId]}")
-
-@bot.command()
 async def viewMemData(ctx, userId:str):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
   await ctx.send(f"View specific member data : {mem_dic[userId]}")
+
+@bot.command()
+async def setMemData(ctx, userId:str, key:str, val:str, valType:int= 0):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  #valType이 1이면 value가 int 타입(default 값 str타입)
+  if valType == 1 : val = int(val)
+  mem_dic[userId][key] = val
+  await ctx.send(f"Setting Completed : {mem_dic[userId]}")
+
+@bot.command()
+async def delMemData(ctx, userId:str):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  if userId=="ALL":
+    mem_dic.clear()
+    return await ctx.send(f"All Members data Deleted(Current Members: {len(mem_dic)})")
+  else :
+    del mem_dic[userId]
+    return await ctx.send(f"{userId} Member data Deleted(Current Members: {len(mem_dic)})")
 
 bot.run(TOKEN_MIMO)
