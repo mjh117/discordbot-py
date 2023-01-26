@@ -43,7 +43,7 @@ async def on_disconnect():
     print("The bot has disconnected from the Discord server.")
 
 @bot.tree.command(name="set")
-@app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식|ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식|ex.05:30)")
+@app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식 | ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식 | ex.05:30)")
 async def setUser(interaction: discord.Interaction, day_num: int, date:str, time:str):
   #일수, 날짜, 시간 입력값 형식 체크
   if day_num < 0 : 
@@ -65,7 +65,7 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{abs(day_num)}**일 차 ({date})")
 
 @bot.tree.command(name="in")
-@app_commands.describe(time="check-in 시간 입력")
+@app_commands.describe(time="check-in 시간 입력(hh:mm 형식 | ex.05:30)")
 async def checkIn(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
@@ -104,7 +104,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
 
 @bot.tree.command(name="out")
-@app_commands.describe(time="check-out 시간 입력")
+@app_commands.describe(time="check-out 시간 입력(hh:mm 형식 | ex.05:30)")
 async def checkOut(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
