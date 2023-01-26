@@ -91,14 +91,17 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     mem_dic[userId]["checkIn_days"] = -1
   #새 멤버 메달 지정 및 상장 수여자 메달 변경
   day_num = mem_dic[userId]["checkIn_days"]
-  mentionStr=""
+  celebrateStr=""
   if(isNewMem or day_num==10 or day_num==30 or day_num==66) :
     mem_dic[userId]["medal"] = getMedal(day_num)
-    if not isNewMem :
-      mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
+    if isNewMem :
+      celebrateStr=f"\n**|** *어서오세요! {userName} 님의 첫 시작을 응원합니다* :shamrock: **|**"
+    else : 
+      mentionStr = f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
+      celebrateStr = f"\n**|** *{day_num}일 차 상장러 대탄생! 축하합니다* :tada: **|**"+mentionStr
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}) {mentionStr}")
+  await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력")
