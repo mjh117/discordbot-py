@@ -140,7 +140,7 @@ async def save(ctx):
 @bot.command()
 async def member(ctx):
   sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
-  strTmp = "순위 | 누적 일수(마지막 출석일) | 이름\n"
+  strTmp = f"순위 | 누적 일수(마지막 출석일) | 이름\n\n**----:scroll:{getDate()} 멤버 현황:scroll:----**\n"
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
   await ctx.send(strTmp)
@@ -152,7 +152,7 @@ async def today(ctx):
     if memdata['checkIn_date'] == getDate():
       tmp_list.append(memdata)
   sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
-  strTmp = "순위 | 시간 | 이름(누적 일수)\n"
+  strTmp = f"순위 | 시간 | 이름(누적 일수)\n\n**----:calendar_spiral:{getDate()} 출석 현황:calendar_spiral:----**\n"
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(mem["checkIn_days"])}일 차)\n'
   await ctx.send(strTmp)
