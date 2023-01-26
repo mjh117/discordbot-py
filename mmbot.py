@@ -98,7 +98,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
       mentionStr=f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal}{userName} in `{time}` {abs(day_num)}일 차 ({date}) {mentionStr}")
+  await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}) {mentionStr}")
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력")
@@ -124,7 +124,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   #체크아웃 정보 출력
   day_num = mem_dic[userId]["checkIn_days"]
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal}{userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
+  await interaction.response.send_message(f"{medal} {userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
 
 
 ####봇관리자 전용 명령
