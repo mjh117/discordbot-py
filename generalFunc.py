@@ -2,6 +2,7 @@ import datetime, json, os, re, requests, base64
 
 GIT_AUTH = os.environ['GIT_AUTH']
 GIT_URL = os.environ['GIT_URL']
+backup_file = "mem_file.json"
 
 def getTime():
   tz = datetime.timezone(datetime.timedelta(hours=9))
@@ -36,8 +37,16 @@ def checkVal(type:str, value:str):
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
   return None
 
-def saveLocal(fname :str, mem_dic : dict):
-  with open(fname, "wt", encoding="utf-8") as fp :
+def readLocal():
+  #체크인 데이터 읽어오기
+  mem_dic = {}
+  with open(backup_file, "rt", encoding="utf-8") as fp:
+    mem_dic = json.load(fp)
+    print(f"Total number of members: {len(mem_dic)}")
+  return mem_dic
+
+def saveLocal(mem_dic : dict):
+  with open(backup_file, "wt", encoding="utf-8") as fp :
     json.dump(mem_dic, fp, indent=4, ensure_ascii=False)  
 
 def saveRemote(mem_dic : dict):
