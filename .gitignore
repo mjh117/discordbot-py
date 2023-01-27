@@ -2,8 +2,9 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 ###local file###
-mmbot_local.py
-mem_file_local.json
+mem_file.json
+mem_file_test.json
+/mmbot-backup
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
