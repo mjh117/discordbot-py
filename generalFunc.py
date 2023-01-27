@@ -80,7 +80,7 @@ def saveLocal(mem_dic : dict):
     return msg
 
 #체크인 데이터 저장소에 저장하기
-def saveRemote(mem_dic : dict):
+def saveRemote(mem_dic : dict, commitMsg:str):
   try:
     url = GIT_URL
     headers = {'Authorization': 'Bearer ' + GIT_AUTH}
@@ -88,7 +88,7 @@ def saveRemote(mem_dic : dict):
     r = requests.get(url, headers=headers)
     sha = r.json()['sha']
     now = getDate() + " " + getTime() +" | "+ str(len(mem_dic))
-    r = requests.put(url, json={'message': f'Backup json file({now})', 'sha': sha, 'content':content}, headers=headers)
+    r = requests.put(url, json={'message': f'Backup {BACKUP_FILE}({now}) :: {commitMsg}', 'sha': sha, 'content':content}, headers=headers)
     status = r.status_code
     if status == 200:
       msg= f"[saveRemote:{status}]Saved Data of {len(mem_dic)} Members"

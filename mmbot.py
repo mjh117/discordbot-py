@@ -148,13 +148,13 @@ async def today(ctx):
 
 ####관리자 전용 명령어
 @bot.command()
-async def save(ctx):
+async def save(ctx, commitMsg:str=''):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
   #로컬에 json 파일 백업
   await ctx.send(saveLocal(mem_dic))
   #저장소에 json 파일 백업
-  await ctx.send(saveRemote(mem_dic))
+  await ctx.send(saveRemote(mem_dic, commitMsg))
 
 @bot.command()
 async def viewMemData(ctx, userId:str):
