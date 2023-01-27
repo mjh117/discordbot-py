@@ -1,8 +1,8 @@
 import datetime, json, os, re, requests, base64
 
 GIT_AUTH = os.environ['GIT_AUTH']
-GIT_URL = os.environ['GIT_URL']
-backup_file = "mem_file.json"
+GIT_URL = os.environ['GIT_URL'] #로컬/원격 URL 분리
+BACKUP_FILE = os.environ['BACKUP_FILE'] #로컬/원격 파일 분리
 
 def getTime():
   tz = datetime.timezone(datetime.timedelta(hours=9))
@@ -37,20 +37,50 @@ def checkVal(type:str, value:str):
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
   return None
 
+#체크인 데이터 로컬에서 읽어오기
 def readLocal():
-  #체크인 데이터 읽어오기
   mem_dic = {}
-  with open(backup_file, "rt", encoding="utf-8") as fp:
-    mem_dic = json.load(fp)
-    print(f"Total number of members: {len(mem_dic)}")
-  return mem_dic
+  try:
+    with open(BACKUP_FILE, "rt", encoding="utf-8") as fp:
+      mem_dic = json.load(fp)
+    msg = f"[readLocal]Total number of members: {len(mem_dic)}"
+  except Exception as e:
+    msg = f"[readLocal:E]Faild to read data from remote({e})"
+  finally:
+    print(msg)
+    return mem_dic
 
+#체크인 데이터 저장소에서 읽어오기
+def readRemote():
+  mem_dic = {}
+  try:
+    url = GIT_URL
+    headers = {'Authorization': 'Bearer ' + GIT_AUTH}
+    r = requests.get(url, headers=headers)
+    content = r.json()['content']
+    bytes2text = base64.b64decode(content).decode('utf-8')
+    mem_dic = json.loads(bytes2text)
+    msg = f"[readRemote]Total number of members: {len(mem_dic)}"
+  except Exception as e:
+    msg = f"[readRemote:E]Faild to read data from remote({e})"
+  finally:
+    print(msg)
+    return mem_dic
+
+#체크인 데이터 로컬에 저장하기
 def saveLocal(mem_dic : dict):
-  with open(backup_file, "wt", encoding="utf-8") as fp :
-    json.dump(mem_dic, fp, indent=4, ensure_ascii=False)  
+  try:
+    with open(BACKUP_FILE, "wt", encoding="utf-8") as fp :
+      json.dump(mem_dic, fp, indent=4, ensure_ascii=False)
+    msg= f"[saveLocal]Saved Data of {len(mem_dic)} Members in local"
+  except Exception as e:
+    msg = f"[saveLocal:E]Faild to save data in local({e})"
+  finally:
+    print(msg)
+    return msg
 
+#체크인 데이터 저장소에 저장하기
 def saveRemote(mem_dic : dict):
-  #깃헙 백업
   try:
     url = GIT_URL
     headers = {'Authorization': 'Bearer ' + GIT_AUTH}
@@ -61,11 +91,11 @@ def saveRemote(mem_dic : dict):
     r = requests.put(url, json={'message': f'Backup json file({now})', 'sha': sha, 'content':content}, headers=headers)
     status = r.status_code
     if status == 200:
-      msg= f"[{status}]Saved Data of {len(mem_dic)} Members"
+      msg= f"[saveRemote:{status}]Saved Data of {len(mem_dic)} Members"
     else :
-      msg = f"[{status}]Faild to save data in remote"
+      msg = f"[saveRemote:{status}]Faild to save data in remote"
   except Exception as e:
-    print(e)
-    msg = f"[except]Faild to save data in remote({e})"
+    msg = f"[saveRemote:E]Faild to save data in remote({e})"
   finally:
+    print(msg)
     return msg

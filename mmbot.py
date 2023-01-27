@@ -14,8 +14,8 @@ intents = discord.Intents.all()
 #intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-#데이터 읽어오기
-mem_dic = readLocal()
+#저장소에서 데이터 읽어오기
+mem_dic = readRemote()
 
 @bot.event
 async def on_ready():
@@ -133,7 +133,7 @@ async def save(ctx):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
   #로컬에 json 파일 백업
-  saveLocal(mem_dic)
+  await ctx.send(saveLocal(mem_dic))
   #저장소에 json 파일 백업
   await ctx.send(saveRemote(mem_dic))
 
