@@ -22,9 +22,7 @@ async def on_ready():
   try:
     synced = await bot.tree.sync()
     print(f"Synced {len(synced)} command(s)")
-    print("Servers of which the bot is a member ::")
-    for guild in bot.guilds:
-      print(guild.name)
+    print("Servers of which the bot is a member :: " + bot.guilds[0].name)
   except Exception as e:
     print(e)
 
@@ -127,16 +125,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   await interaction.response.send_message(f"{medal} {userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
 
 
-####봇관리자 전용 명령
-@bot.command()
-async def save(ctx):
-  if "bot-manager" not in [r.name for r in ctx.author.roles]:
-    return await ctx.send("You do not have permission to use this command.")
-  #로컬에 json 파일 백업
-  await ctx.send(saveLocal(mem_dic))
-  #저장소에 json 파일 백업
-  await ctx.send(saveRemote(mem_dic))
-
+####현황 체크 명령어
 @bot.command()
 async def member(ctx):
   sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
@@ -157,11 +146,21 @@ async def today(ctx):
     strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(mem["checkIn_days"])}일 차)\n'
   await ctx.send(strTmp)
 
+####관리자 전용 명령어
+@bot.command()
+async def save(ctx):
+  if "bot-manager" not in [r.name for r in ctx.author.roles]:
+    return await ctx.send("You do not have permission to use this command.")
+  #로컬에 json 파일 백업
+  await ctx.send(saveLocal(mem_dic))
+  #저장소에 json 파일 백업
+  await ctx.send(saveRemote(mem_dic))
+
 @bot.command()
 async def viewMemData(ctx, userId:str):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
-  await ctx.send(f"View specific member data : {mem_dic[userId]}")
+  await ctx.send(f"View Member data of {userId}:\n{mem_dic[userId]}")
 
 @bot.command()
 async def setMemData(ctx, userId:str, key:str, val:str, valType:int= 0):
@@ -170,13 +169,13 @@ async def setMemData(ctx, userId:str, key:str, val:str, valType:int= 0):
   #valType이 1이면 value가 int 타입(default 값 str타입)
   if valType == 1 : val = int(val)
   mem_dic[userId][key] = val
-  await ctx.send(f"Setting Completed : {mem_dic[userId]}")
+  await ctx.send(f"Set Member data '{key} : {val}':\n{mem_dic[userId]}")
 
 @bot.command()
 async def delMemData(ctx, userId:str):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
-  if userId=="ALL":
+  if userId=="ALL_MEM":
     mem_dic.clear()
     return await ctx.send(f"All Members data Deleted(Current Members: {len(mem_dic)})")
   else :
