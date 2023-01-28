@@ -126,7 +126,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   checkIn_time = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["checkIn_time"], "%y-%m-%d %H:%M")
   checkOut_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")
   if(checkIn_time>checkOut_time) : 
-    await interaction.response.send_message(f"{time}(X) 체크인 이후의 시간을 입력해주세요.")
+    return await interaction.response.send_message(f"{time}(X) 체크인 이후의 시간을 입력해주세요.")
   stay_delta = checkOut_time-checkIn_time
   stay_time = str(datetime.timedelta(seconds=stay_delta.seconds))
   #체크아웃 정보 출력
