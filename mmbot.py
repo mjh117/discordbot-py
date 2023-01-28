@@ -43,12 +43,12 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   #일수, 날짜, 시간 입력값 형식 체크
   if day_num < 0 : 
     return await interaction.response.send_message(f"{day_num}(X) 양수 값을 입력해주세요.")
-  msg_date = checkVal("date", date)
-  if msg_date :
-    return await interaction.response.send_message(msg_date)
-  msg_time = checkVal("time", time)
-  if msg_time :
-    return await interaction.response.send_message(msg_time)
+  errDate = checkVal("date", date)
+  if errDate :
+    return await interaction.response.send_message(errDate)
+  errTime = checkVal("time", time)
+  if errTime :
+    return await interaction.response.send_message(errTime)
   #체크인 설정값 저장 및 출력
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
@@ -72,11 +72,16 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   date = getDate()
   if mem_dic[userId]["checkIn_date"] == date : 
     return await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
-  #시간 입력값 형식 체크
-  if time == None: time = getTime()
-  msg_time = checkVal("time", time)
-  if msg_time : 
-    return await interaction.response.send_message(msg_time)
+  #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
+  if time == None:
+    utcInfo = 9
+    if "utcInfo" in mem_dic[userId] :
+      utcInfo = mem_dic[userId]["utcInfo"]
+    time = getTime(utcInfo)
+  else :
+    errTime = checkVal("time", time)
+    if errTime :
+      return await interaction.response.send_message(errTime)
   #체크인 정보 저장 및 출력
   mem_dic[userId]["checkIn_days"] += 1
   mem_dic[userId]["checkIn_date"] = date
@@ -107,11 +112,16 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   cur_date = getDate()
   if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
     return await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
-  #시간 입력값 형식 체크
-  if time == None: time = getTime()
-  msg_time = checkVal("time", time)
-  if msg_time :
-    return await interaction.response.send_message(msg_time)
+  #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
+  if time == None:
+    utcInfo = 9
+    if "utcInfo" in mem_dic[userId] :
+      utcInfo = mem_dic[userId]["utcInfo"]
+    time = getTime(utcInfo)
+  else :
+    errTime = checkVal("time", time)
+    if errTime :
+      return await interaction.response.send_message(errTime)
   #체류 시간 구하기
   checkIn_time = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["checkIn_time"], "%y-%m-%d %H:%M")
   checkOut_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")

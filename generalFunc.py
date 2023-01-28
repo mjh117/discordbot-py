@@ -4,8 +4,8 @@ GIT_AUTH = os.environ['GIT_AUTH']
 GIT_URL = os.environ['GIT_URL'] #로컬/원격 URL 분리
 BACKUP_FILE = os.environ['BACKUP_FILE'] #로컬/원격 파일 분리
 
-def getTime():
-  tz = datetime.timezone(datetime.timedelta(hours=9))
+def getTime(utcInfo:int=9):
+  tz = datetime.timezone(datetime.timedelta(hours=utcInfo))
   cur_time = datetime.datetime.now(tz=tz).strftime('%H:%M')
   return cur_time
 
@@ -22,6 +22,15 @@ def getMedal(day_num : int):
   elif day_num>=66 : medal = ":medal:"
   return medal
 
+#자동 생성시 해외거주 체크
+# def checkAbroad(mem_dic:dict, userID:str):
+#   utcInfo = 9
+#   if "utcInfo" in mem_dic[userId] :
+#     utcInfo = mem_dic[userId]["utcInfo"]
+#   timeStr = getTime(utcInfo)
+#   return timeStr
+
+#수동 입력시 형식 체크
 def checkVal(type:str, value:str):
   if type=="date":
     if not bool(re.match(r"^\d{2}-\d{2}-\d{2}$", value)) :
@@ -35,7 +44,7 @@ def checkVal(type:str, value:str):
     tNum = value.split(":")
     if int(tNum[0])<0 or int(tNum[0])>23 or int(tNum[1])<0 or  int(tNum[1])>59 :
       return f"{value}(X) 범위 내의 시간을 입력해주세요."
-  return None
+  return None #정상 입력
 
 #체크인 데이터 로컬에서 읽어오기
 def readLocal():
