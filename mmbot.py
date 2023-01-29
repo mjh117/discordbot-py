@@ -153,7 +153,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   #체크아웃 정보 출력
   day_num = mem_dic[userId]["checkIn_days"]
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal} {userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
+  await interaction.response.send_message(f"{medal} {userName} out `{time}` {abs(day_num)}일 차 ({cur_date} | {stay_time[:-3]} 체류)")
 
 ####현황 체크 명령어
 @bot.command()
@@ -162,7 +162,7 @@ async def member(ctx):
   strTmp = f"순위 | 누적 일수(마지막 출석일) | 이름\n\n**----:scroll:{getDate()} 멤버 현황:scroll:----**\n"
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
-  await ctx.send(strTmp)
+  await ctx.send(strTmp+"**----------------------------------**")
 
 @bot.command()
 async def today(ctx):
@@ -174,7 +174,7 @@ async def today(ctx):
   strTmp = f"순위 | 시간 | 이름(누적 일수)\n\n**----:calendar_spiral:{getDate()} 출석 현황:calendar_spiral:----**\n"
   for i, mem in enumerate(sorted_list):
     strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(mem["checkIn_days"])}일 차)\n'
-  await ctx.send(strTmp)
+  await ctx.send(strTmp+"**----------------------------------**")
 
 ####관리자 전용 명령어
 @bot.command()
