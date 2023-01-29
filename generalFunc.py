@@ -23,12 +23,12 @@ def getMedal(day_num : int):
   return medal
 
 #자동 생성시 해외거주 체크
-# def checkAbroad(mem_dic:dict, userID:str):
-#   utcInfo = 9
-#   if "utcInfo" in mem_dic[userId] :
-#     utcInfo = mem_dic[userId]["utcInfo"]
-#   timeStr = getTime(utcInfo)
-#   return timeStr
+def checkAbroad(mem_dic:dict, userId:str):
+  utcInfo = 9
+  if "utcInfo" in mem_dic[userId] :
+    utcInfo = mem_dic[userId]["utcInfo"]
+  timeStr = getTime(utcInfo)
+  return timeStr
 
 #수동 입력시 형식 체크
 def checkVal(type:str, value:str):

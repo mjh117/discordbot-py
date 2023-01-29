@@ -78,10 +78,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     return await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
   #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
   if time == None:
-    utcInfo = 9
-    if "utcInfo" in mem_dic[userId] :
-      utcInfo = mem_dic[userId]["utcInfo"]
-    time = getTime(utcInfo)
+    time = checkAbroad(mem_dic, userId)
   else :
     errTime = checkVal("time", time)
     if errTime :
@@ -118,10 +115,7 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
     return await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
   #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
   if time == None:
-    utcInfo = 9
-    if "utcInfo" in mem_dic[userId] :
-      utcInfo = mem_dic[userId]["utcInfo"]
-    time = getTime(utcInfo)
+    time = checkAbroad(mem_dic, userId)
   else :
     errTime = checkVal("time", time)
     if errTime :
@@ -137,7 +131,6 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
   day_num = mem_dic[userId]["checkIn_days"]
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal} {userName} out `{time}` {abs(day_num)}일 차 ({stay_time[:-3]} 체류)")
-
 
 ####현황 체크 명령어
 @bot.command()
