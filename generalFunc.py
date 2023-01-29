@@ -4,8 +4,8 @@ GIT_AUTH = os.environ['GIT_AUTH']
 GIT_URL = os.environ['GIT_URL'] #로컬/원격 URL 분리
 BACKUP_FILE = os.environ['BACKUP_FILE'] #로컬/원격 파일 분리
 
-def getTime(utcInfo:int=9):
-  tz = datetime.timezone(datetime.timedelta(hours=utcInfo))
+def getTime(utc_hour:int=9):
+  tz = datetime.timezone(datetime.timedelta(hours=utc_hour))
   cur_time = datetime.datetime.now(tz=tz).strftime('%H:%M')
   return cur_time
 
@@ -24,10 +24,10 @@ def getMedal(day_num : int):
 
 #자동 생성시 해외거주 체크
 def checkAbroad(mem_dic:dict, userId:str):
-  utcInfo = 9
-  if "utcInfo" in mem_dic[userId] :
-    utcInfo = mem_dic[userId]["utcInfo"]
-  timeStr = getTime(utcInfo)
+  utc_hour = 9
+  if "utc_hour" in mem_dic[userId] :
+    utc_hour = mem_dic[userId]["utc_hour"]
+  timeStr = getTime(utc_hour)
   return timeStr
 
 #수동 입력시 형식 체크

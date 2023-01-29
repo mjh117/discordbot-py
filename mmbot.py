@@ -39,6 +39,24 @@ async def on_disconnect():
     print(f"[on_disconnect][Exception][{getTime()}]",e)
     traceback.format_exc()
 
+####데이터 설정 명령어
+@bot.tree.command(name="utc")
+@app_commands.describe(utc_hour="거주 지역의 UTC offset값을 정수로 입력해주세요(ex. 독일: 1, 뉴욕: -5)")
+async def setUtcHour(interaction: discord.Interaction, utc_hour: int):
+  #정수 입력값 형식 체크
+  if not (utc_hour >= -12 and utc_hour <= 14): # -12 ~ +14 범위의 값
+    return await interaction.response.send_message(f"{utc_hour}(X) -12 ~ 14 범위의 값을 입력해주세요.")
+  #utc_hour값 추가
+  userId = str(interaction.user.id)
+  userName = interaction.user.display_name
+  if userId not in mem_dic : 
+    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
+  mem_dic[userId]["utc_hour"]= utc_hour
+  #utc 시간대 출력
+  utcStr = f"UTC+{utc_hour}:00" if utc_hour>=0 else f"UTC{utc_hour}:00"
+  await interaction.response.send_message(f"Timezone Setting Completed :{utcStr}")
+  print("[setUtcHour]", userName, utcStr)
+
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식 | ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식 | ex.05:30)")
 async def setUser(interaction: discord.Interaction, day_num: int, date:str, time:str):
@@ -59,7 +77,7 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   if userId=='941581845194240001':
     day_num = -1
   medal = getMedal(day_num)
-  #utcInfo 지워지지 않도록 변경된 값만 수정
+  #utc_hour 지워지지 않도록 변경된 값만 수정
   if userId not in mem_dic : mem_dic[userId] = {"user_name" : userName}
   mem_dic[userId]["checkIn_days"]= day_num
   mem_dic[userId]["checkIn_date"]= date
@@ -68,14 +86,14 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{abs(day_num)}**일 차 ({date})")
   print("[setUser]", mem_dic[userId])
 
+####출석 체크 명령어
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력(hh:mm 형식 | ex.05:30)")
 async def checkIn(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
-  isNewMem = userId not in mem_dic # True->NewMem, False->OldMem
   #새 멤버 추가
-  if isNewMem:
+  if userId not in mem_dic:
     mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
   #중복 출첵 막기
   date = getDate()
@@ -86,8 +104,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     time = checkAbroad(mem_dic, userId)
   else :
     errTime = checkVal("time", time)
-    if errTime :
-      return await interaction.response.send_message(errTime)
+    if errTime : return await interaction.response.send_message(errTime)
   #체크인 정보 저장 및 출력
   mem_dic[userId]["checkIn_days"] += 1
   mem_dic[userId]["checkIn_date"] = date
@@ -98,9 +115,9 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   #새 멤버 메달 지정 및 상장 수여자 메달 변경
   day_num = mem_dic[userId]["checkIn_days"]
   celebrateStr=""
-  if(isNewMem or day_num==10 or day_num==30 or day_num==66) :
+  if(day_num==1 or day_num==10 or day_num==30 or day_num==66) :
     mem_dic[userId]["medal"] = getMedal(day_num)
-    if isNewMem :
+    if day_num==1 :
       celebrateStr=f"\n**|** *어서오세요! {userName} 님의 첫 시작을 응원합니다* :shamrock: **|**"
     else : 
       mentionStr = f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
@@ -108,7 +125,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
-  print("[checkIn]", userName)
+  print("[checkIn]", userName, time)
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력(hh:mm 형식 | ex.05:30)")
