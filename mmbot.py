@@ -59,9 +59,14 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   if userId=='941581845194240001':
     day_num = -1
   medal = getMedal(day_num)
-  mem_dic[userId] = {"user_name" : userName, "checkIn_days": day_num, "checkIn_date": date, "checkIn_time":time, "medal" : medal}
-  print("set data ::" , mem_dic[userId])
+  #utcInfo 지워지지 않도록 변경된 값만 수정
+  if userId not in mem_dic : mem_dic[userId] = {"user_name" : userName}
+  mem_dic[userId]["checkIn_days"]= day_num
+  mem_dic[userId]["checkIn_date"]= date
+  mem_dic[userId]["checkIn_time"]=time
+  mem_dic[userId]["medal"] = medal
   await interaction.response.send_message(f"Setting Completed : {userName} `{time}` **{abs(day_num)}**일 차 ({date})")
+  print("[setUser]", mem_dic[userId])
 
 @bot.tree.command(name="in")
 @app_commands.describe(time="check-in 시간 입력(hh:mm 형식 | ex.05:30)")
@@ -103,6 +108,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
+  print("[checkIn]", userName)
 
 @bot.tree.command(name="out")
 @app_commands.describe(time="check-out 시간 입력(hh:mm 형식 | ex.05:30)")
