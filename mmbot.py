@@ -189,26 +189,39 @@ async def save(ctx, commitMsg:str=''):
 async def viewMemData(ctx, userId:str):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
+  if userId not in mem_dic :
+    return await ctx.send("KeyError: "+userId)
   await ctx.send(f"View Member data of {userId}:\n{mem_dic[userId]}")
 
 @bot.command()
 async def setMemData(ctx, userId:str, key:str, val:str, valType:int= 0):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
+  if userId not in mem_dic :
+    return await ctx.send("KeyError: "+userId)  
   #valType이 1이면 value가 int 타입(default 값 str타입)
   if valType == 1 : val = int(val)
   mem_dic[userId][key] = val
   await ctx.send(f"Set Member data '{key} : {val}':\n{mem_dic[userId]}")
 
 @bot.command()
-async def delMemData(ctx, userId:str):
+async def delMemData(ctx, userId:str, key:str=None):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
-  if userId=="ALL_MEM":
+  #전체 멤버 삭제
+  if userId=="ALL_MEMBER_DATA":
     mem_dic.clear()
     return await ctx.send(f"All Members data Deleted(Current Members: {len(mem_dic)})")
-  else :
+  #멤버 한 명 삭제
+  if userId not in mem_dic :
+    return await ctx.send("KeyError: "+userId)
+  if key is None :
     del mem_dic[userId]
-    return await ctx.send(f"{userId} Member data Deleted(Current Members: {len(mem_dic)})")
+    return await ctx.send(f"All data of {userId} Deleted(Current Members: {len(mem_dic)})")
+  #멤버 정보 한 개 삭제
+  if key not in mem_dic[userId] :
+    return await ctx.send("KeyError: "+key)
+  del mem_dic[userId][key]
+  return await ctx.send(f"'{key}' data of {userId} Deleted\n{mem_dic[userId]}")
 
 bot.run(TOKEN_DICO)
