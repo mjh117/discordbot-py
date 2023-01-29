@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import datetime, json, re, os, requests, base64
+import traceback
 from generalFunc import *
 
 #로컬 환경변수 -> TEST 서버 토큰
@@ -34,6 +35,7 @@ async def on_disconnect():
     saveRemote(mem_dic, "on_disconnect")
   except Exception as e:
     print("[on_disconnect:E]",e)
+    traceback.format_exc()
   finally:
     print(f"[on_disconnect {getTime()}]The bot has disconnected from the Discord server.")
 
