@@ -17,6 +17,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 
 #저장소에서 데이터 읽어오기
 mem_dic = readRemote()
+saveLocal(mem_dic)
 
 @bot.event
 async def on_ready():
