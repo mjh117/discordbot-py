@@ -76,6 +76,16 @@ def readRemote():
     print(msg)
     return mem_dic
 
+#변경 사항이 있으면 저장하기
+def updateData(mem_dic : dict, commitMsg:str):
+  tem_dic = readLocal()
+  if(mem_dic==tem_dic) :
+    return "[updateData]There is no data to update"
+  else :
+    localMsg = saveLocal(mem_dic)
+    remoteMsg = saveRemote(mem_dic, commitMsg)
+    return localMsg+"\n"+remoteMsg
+
 #체크인 데이터 로컬에 저장하기
 def saveLocal(mem_dic : dict):
   try:

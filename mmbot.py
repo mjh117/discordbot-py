@@ -30,14 +30,13 @@ async def on_ready():
 @bot.event
 async def on_disconnect():
   try:
-    print(f"[on_disconnect {getTime()}]")
-    saveLocal(mem_dic)
-    saveRemote(mem_dic, "on_disconnect")
+    print(f"[on_disconnect][{getTime()}]")
+    #변경 사항 저장
+    resultMsg= updateData(mem_dic, "on_disconnect")
+    print(resultMsg)
   except Exception as e:
-    print("[on_disconnect:E]",e)
+    print(f"[on_disconnect][Exception][{getTime()}]",e)
     traceback.format_exc()
-  finally:
-    print(f"[on_disconnect {getTime()}]The bot has disconnected from the Discord server.")
 
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식 | ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식 | ex.05:30)")
@@ -158,10 +157,9 @@ async def today(ctx):
 async def save(ctx, commitMsg:str=''):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
-  #로컬에 json 파일 백업
-  await ctx.send(saveLocal(mem_dic))
-  #저장소에 json 파일 백업
-  await ctx.send(saveRemote(mem_dic, commitMsg))
+  #변경 사항 저장
+  resultMsg= updateData(mem_dic, commitMsg)
+  await ctx.send(resultMsg)
 
 @bot.command()
 async def viewMemData(ctx, userId:str):
