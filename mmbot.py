@@ -26,7 +26,7 @@ async def backupData():
   resultMsg= updateData(mem_dic, "(loop)backupData")
   print(f"[backupData][{getTime()}]{resultMsg}")
 
-@tasks.loop(time=datetime.time(hour=18, minute=30, tzinfo= datetime.timezone(datetime.timedelta(hours=9))))
+@tasks.loop(time=datetime.time(hour=18, minute=0, tzinfo= datetime.timezone(datetime.timedelta(hours=9))))
 async def dailyReport():
   message_channel = bot.get_channel(int(REPORT_CHANNEL_ID))
   print(f"Got channel {message_channel}")
