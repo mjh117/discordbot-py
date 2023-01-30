@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 import datetime, json, re, os, requests, base64
 import traceback
 from generalFunc import *
@@ -19,12 +19,26 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 mem_dic = readRemote()
 saveLocal(mem_dic)
 
+###백그라운드 태스크
+@tasks.loop(seconds=5)
+async def myprinter():
+  message_channel = bot.get_channel('채널 ID')
+  print(f"Got channel {message_channel}")
+  await message_channel.send("메시지")
+
+@myprinter.before_loop
+async def before():
+  await bot.wait_until_ready()
+  print("Finished waiting")
+
+### 봇 올라오거나 연결 끊길 때
 @bot.event
 async def on_ready():
   try:
     synced = await bot.tree.sync()
     print(f"Synced {len(synced)} command(s)")
     print("Servers of which the bot is a member :: " + bot.guilds[0].name)
+    myprinter.start()
   except Exception as e:
     print(e)
 
