@@ -21,9 +21,7 @@ mem_dic = readRemote()
 saveLocal(mem_dic)
 
 ###백그라운드 태스크
-# @tasks.loop(seconds=10)
-tz = datetime.timezone(datetime.timedelta(hours=9))
-@tasks.loop(time=datetime.time(hour=12, minute=11, tzinfo=tz))
+@tasks.loop(time=datetime.time(hour=18, minute=30, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
 async def dailyReport():
   message_channel = bot.get_channel(int(REPORT_CHANNEL_ID))
   print(f"Got channel {message_channel}")
