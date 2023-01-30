@@ -21,7 +21,12 @@ mem_dic = readRemote()
 saveLocal(mem_dic)
 
 ###백그라운드 태스크
-@tasks.loop(time=datetime.time(hour=18, minute=30, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
+@tasks.loop(hours=3)
+async def backupData():
+  resultMsg= updateData(mem_dic, "(loop)backupData")
+  print(f"[backupData][{getTime()}]{resultMsg}")
+
+@tasks.loop(time=datetime.time(hour=18, minute=30, tzinfo= datetime.timezone(datetime.timedelta(hours=9))))
 async def dailyReport():
   message_channel = bot.get_channel(int(REPORT_CHANNEL_ID))
   print(f"Got channel {message_channel}")
@@ -31,11 +36,11 @@ async def dailyReport():
   reportStr+= "> \n**----:robot:Today's Daily Report:robot:----**\n"
   reportStr+= f"등록 멤버({len(mem_dic):02d}) | 출석 멤버({todayMem:02d})\n"
   reportStr+= f"신규 멤버({newMem:02d}) | 상장 멤버({newMedal:02d})"
-  #reportStr+= memberStr + "\n" + todayStr
   await message_channel.send(reportStr)
   await message_channel.send("> \n"+memberStr)
   await message_channel.send("> \n"+todayStr)
 
+@backupData.before_loop
 @dailyReport.before_loop
 async def before():
   await bot.wait_until_ready()
@@ -49,6 +54,7 @@ async def on_ready():
     print(f"Synced {len(synced)} command(s)")
     print("Servers of which the bot is a member :: " + bot.guilds[0].name)
     dailyReport.start()
+    backupData.start()
   except Exception as e:
     print(e)
 
