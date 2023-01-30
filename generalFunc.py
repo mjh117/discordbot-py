@@ -118,3 +118,30 @@ def saveRemote(mem_dic : dict, commitMsg:str):
   finally:
     print(msg)
     return msg
+
+#등록 현황 문자열 반환
+def getMember(mem_dic:dict) :
+  sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
+  strTmp = f"**----:scroll:{getDate()} 멤버 현황:scroll:----**\n"
+  for i, mem in enumerate(sorted_list):
+    strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
+  return strTmp
+
+#출결 현황 문자열 반환
+def getToday(mem_dic:dict) :
+  tmp_list =[]; newMem = 0 ; newMedal = 0
+  for memdata in mem_dic.values() :
+    if memdata['checkIn_date'] == getDate():
+      tmp_list.append(memdata)
+  sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
+  strTmp = f"**----:calendar_spiral:{getDate()} 출석 현황:calendar_spiral:----**"
+  for i, mem in enumerate(sorted_list):
+    day_num = mem["checkIn_days"]
+    strTmp += f'\n{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(day_num)}일 차)'
+    if day_num == 1: 
+      strTmp+= " :shamrock:"
+      newMem+= 1
+    if day_num ==10 or day_num==30 or day_num==66 :
+      strTmp+= " :tada:"
+      newMedal+=1
+  return strTmp, len(sorted_list), newMem, newMedal

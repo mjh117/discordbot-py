@@ -7,7 +7,8 @@ from generalFunc import *
 
 #로컬 환경변수 -> TEST 서버 토큰
 #원격 환경변수 -> MIMO 서버 토큰
-TOKEN_DICO = os.environ['TOKEN_DICO'] 
+TOKEN_DICO = os.environ['TOKEN_DICO']
+REPORT_CHANNEL_ID = os.environ['REPORT_CHANNEL']
 
 intents = discord.Intents.default()
 intents = discord.Intents.all()
@@ -21,12 +22,12 @@ saveLocal(mem_dic)
 
 ###백그라운드 태스크
 @tasks.loop(seconds=5)
-async def myprinter():
-  message_channel = bot.get_channel('채널 ID')
+async def dailyReport():
+  message_channel = bot.get_channel(REPORT_CHANNEL_ID)
   print(f"Got channel {message_channel}")
   await message_channel.send("메시지")
 
-@myprinter.before_loop
+@dailyReport.before_loop
 async def before():
   await bot.wait_until_ready()
   print("Finished waiting")
@@ -38,7 +39,7 @@ async def on_ready():
     synced = await bot.tree.sync()
     print(f"Synced {len(synced)} command(s)")
     print("Servers of which the bot is a member :: " + bot.guilds[0].name)
-    myprinter.start()
+    #dailyReport.start()
   except Exception as e:
     print(e)
 
@@ -172,23 +173,13 @@ async def checkOut(interaction: discord.Interaction, time: str = None):
 ####현황 체크 명령어
 @bot.command()
 async def member(ctx):
-  sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
-  strTmp = f"순위 | 누적 일수(마지막 출석일) | 이름\n\n**----:scroll:{getDate()} 멤버 현황:scroll:----**\n"
-  for i, mem in enumerate(sorted_list):
-    strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
-  await ctx.send(strTmp+"**----------------------------------**")
+  memberStr = getMember(mem_dic)
+  await ctx.send("순위 | 누적일(마지막 출석일) | 이름\n\n"+memberStr)
 
 @bot.command()
 async def today(ctx):
-  tmp_list =[]
-  for memdata in mem_dic.values() :
-    if memdata['checkIn_date'] == getDate():
-      tmp_list.append(memdata)
-  sorted_list = sorted(tmp_list,key= lambda x : x['checkIn_time'])
-  strTmp = f"순위 | 시간 | 이름(누적 일수)\n\n**----:calendar_spiral:{getDate()} 출석 현황:calendar_spiral:----**\n"
-  for i, mem in enumerate(sorted_list):
-    strTmp += f'{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(mem["checkIn_days"])}일 차)\n'
-  await ctx.send(strTmp+"**----------------------------------**")
+  todayStr = getToday(mem_dic)[0]
+  await ctx.send("순위 | 시간 | 이름(누적일)\n\n"+todayStr)
 
 ####관리자 전용 명령어
 @bot.command()
