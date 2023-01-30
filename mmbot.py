@@ -8,7 +8,7 @@ from generalFunc import *
 #로컬 환경변수 -> TEST 서버 토큰
 #원격 환경변수 -> MIMO 서버 토큰
 TOKEN_DICO = os.environ['TOKEN_DICO']
-REPORT_CHANNEL_ID = os.environ['REPORT_CHANNEL']
+REPORT_CHANNEL_ID = os.environ['REPORT_CHANNEL_ID']
 
 intents = discord.Intents.default()
 intents = discord.Intents.all()
@@ -21,11 +21,22 @@ mem_dic = readRemote()
 saveLocal(mem_dic)
 
 ###백그라운드 태스크
-@tasks.loop(seconds=5)
+# @tasks.loop(seconds=10)
+tz = datetime.timezone(datetime.timedelta(hours=9))
+@tasks.loop(time=datetime.time(hour=12, minute=11, tzinfo=tz))
 async def dailyReport():
-  message_channel = bot.get_channel(REPORT_CHANNEL_ID)
+  message_channel = bot.get_channel(int(REPORT_CHANNEL_ID))
   print(f"Got channel {message_channel}")
-  await message_channel.send("메시지")
+  memberStr = getMember(mem_dic)
+  todayStr, todayMem, newMem, newMedal = getToday(mem_dic)
+  reportStr = "Hello, I'm MMBot!\n"
+  reportStr+= "> \n**----:robot:Today's Daily Report:robot:----**\n"
+  reportStr+= f"등록 멤버({len(mem_dic):02d}) | 출석 멤버({todayMem:02d})\n"
+  reportStr+= f"신규 멤버({newMem:02d}) | 상장 멤버({newMedal:02d})"
+  #reportStr+= memberStr + "\n" + todayStr
+  await message_channel.send(reportStr)
+  await message_channel.send("> \n"+memberStr)
+  await message_channel.send("> \n"+todayStr)
 
 @dailyReport.before_loop
 async def before():
@@ -39,7 +50,7 @@ async def on_ready():
     synced = await bot.tree.sync()
     print(f"Synced {len(synced)} command(s)")
     print("Servers of which the bot is a member :: " + bot.guilds[0].name)
-    #dailyReport.start()
+    dailyReport.start()
   except Exception as e:
     print(e)
 
