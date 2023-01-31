@@ -152,6 +152,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     else : 
       mentionStr = f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
       celebrateStr = f"\n**|** *{day_num}일 차 상장러 대탄생! 축하합니다* :tada: **|**"+mentionStr
+      celebrateStr += "\n**|** *영문 이름&이미지를 답장으로 달아주세요* :blush: **|**"
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
