@@ -207,6 +207,10 @@ async def save(ctx, commitMsg:str=''):
   await ctx.send(resultMsg)
 
 @bot.command()
+async def dReport(ctx):
+  await dailyReport()
+
+@bot.command()
 async def viewMemData(ctx, userId:str):
   if "bot-manager" not in [r.name for r in ctx.author.roles]:
     return await ctx.send("You do not have permission to use this command.")
