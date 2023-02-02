@@ -69,6 +69,14 @@ async def on_disconnect():
     print(f"[on_disconnect][Exception][{getTime()}]",e)
     traceback.format_exc()
 
+@bot.event
+async def on_close():
+  print(f"[on_close][Exception][{getTime()}]")
+
+@bot.event
+async def on_error():
+  print(f"[on_error][Exception][{getTime()}]")
+
 ####데이터 설정 명령어
 @bot.tree.command(name="utc")
 @app_commands.describe(utc_hour="거주 지역의 UTC offset값을 정수로 입력해주세요(ex. 독일: 1, 뉴욕: -5)")
@@ -287,5 +295,8 @@ async def delMemData(ctx, userId:str, key:str=None):
     return await ctx.send("KeyError: "+key)
   del mem_dic[userId][key]
   return await ctx.send(f"'{key}' data of {userId} Deleted\n{mem_dic[userId]}")
-
-bot.run(TOKEN_DICO)
+try:
+  bot.run(TOKEN_DICO)
+except Exception as e:
+  print(f"[RuntimeError][{getTime()}]",e)
+  traceback.format_exc()
