@@ -124,6 +124,8 @@ def getMember(mem_dic:dict) :
   sorted_list = sorted(mem_dic.values(),reverse=True, key= lambda x : int(x['checkIn_days']))
   strTmp = f"**----:scroll:{getDate()} 멤버 현황:scroll:----**\n"
   for i, mem in enumerate(sorted_list):
+    if mem["checkIn_days"] == 0 :
+      continue
     strTmp += f'{i+1:02d} | {abs(mem["checkIn_days"]):02d}일 차({mem["checkIn_date"]}) | {mem["medal"]}{mem["user_name"]}\n'
   return strTmp
 
@@ -137,6 +139,8 @@ def getToday(mem_dic:dict) :
   strTmp = f"**----:calendar_spiral:{getDate()} 출석 현황:calendar_spiral:----**"
   for i, mem in enumerate(sorted_list):
     day_num = mem["checkIn_days"]
+    if day_num ==0 : 
+      continue
     strTmp += f'\n{i+1:02d} | {mem["checkIn_time"]} | {mem["medal"]}{mem["user_name"]}({abs(day_num)}일 차)'
     if day_num == 1: 
       strTmp+= " :shamrock:"
