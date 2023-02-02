@@ -84,8 +84,20 @@ async def setUtcHour(interaction: discord.Interaction, utc_hour: int):
   mem_dic[userId]["utc_hour"]= utc_hour
   #utc 시간대 출력
   utcStr = f"UTC+{utc_hour}:00" if utc_hour>=0 else f"UTC{utc_hour}:00"
-  await interaction.response.send_message(f"Timezone Setting Completed :{utcStr}")
+  await interaction.response.send_message(f"TimeZone Setting Completed :{utcStr}")
   print("[setUtcHour]", userName, utcStr)
+
+@bot.tree.command(name="limit")
+@app_commands.describe(time_limit ="체크인 제한 시간(hh:mm 형식 | ex.05:30)")
+async def setTimeLimit(interaction: discord.Interaction, time_limit:str):
+  #시간 입력값 형식 체크
+  errTime = checkVal("time", time_limit)
+  if errTime :
+    return await interaction.response.send_message(errTime)
+  userId = str(interaction.user.id)
+  mem_dic[userId]["time_limit"] = time_limit
+  await interaction.response.send_message(f"TimeLimit Setting Completed : {time_limit}")
+  print("[setTimeLimit]", mem_dic[userId]["time_limit"])
 
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식 | ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식 | ex.05:30)")
@@ -126,8 +138,8 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   if userId not in mem_dic:
     mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
   #중복 출첵 막기
-  date = getDate()
-  if mem_dic[userId]["checkIn_date"] == date : 
+  cur_date = getDate()
+  if mem_dic[userId]["checkIn_date"] == cur_date : 
     return await interaction.response.send_message(f"{userName} 님, 출석 체크는 하루에 한 번만 가능합니다.")
   #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
   if time == None:
@@ -135,9 +147,15 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   else :
     errTime = checkVal("time", time)
     if errTime : return await interaction.response.send_message(errTime)
+  #목표 시간 비교하기
+  if "time_limit" in mem_dic[userId] :
+    cur_time = datetime.datetime.strptime(cur_date+" "+time, "%y-%m-%d %H:%M")
+    time_limit = datetime.datetime.strptime(cur_date+" "+mem_dic[userId]["time_limit"], "%y-%m-%d %H:%M")
+    if(cur_time>time_limit) : 
+      return await interaction.response.send_message(f"{time}(X) 목표한 체크인 시간은 {mem_dic[userId]['time_limit']}입니다.")
   #체크인 정보 저장 및 출력
   mem_dic[userId]["checkIn_days"] += 1
-  mem_dic[userId]["checkIn_date"] = date
+  mem_dic[userId]["checkIn_date"] = cur_date
   mem_dic[userId]["checkIn_time"] = time
   #특정 유저 처리
   if userId== '941581845194240001':
@@ -155,7 +173,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
       celebrateStr += "\n**|** *영문 이름&이미지를 답장으로 달아주세요* :blush: **|**"
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
-  await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({date}){celebrateStr}")
+  await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({cur_date}){celebrateStr}")
   print("[checkIn]", userName, time)
 
 @bot.tree.command(name="out")
