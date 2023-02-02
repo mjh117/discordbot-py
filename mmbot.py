@@ -73,14 +73,15 @@ async def on_disconnect():
 @bot.tree.command(name="utc")
 @app_commands.describe(utc_hour="거주 지역의 UTC offset값을 정수로 입력해주세요(ex. 독일: 1, 뉴욕: -5)")
 async def setUtcHour(interaction: discord.Interaction, utc_hour: int):
+  userId = str(interaction.user.id)
+  userName = interaction.user.display_name
+  #미등록 멤버 제한
+  if userId not in mem_dic : 
+    return await interaction.response.send_message(f"{userName} 님, 먼저 멤버 등록을 해주세요. 채팅창에 `!new`를 입력해보세요.")
   #정수 입력값 형식 체크
   if not (utc_hour >= -12 and utc_hour <= 14): # -12 ~ +14 범위의 값
     return await interaction.response.send_message(f"{utc_hour}(X) -12 ~ 14 범위의 값을 입력해주세요.")
   #utc_hour값 추가
-  userId = str(interaction.user.id)
-  userName = interaction.user.display_name
-  if userId not in mem_dic : 
-    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
   mem_dic[userId]["utc_hour"]= utc_hour
   #utc 시간대 출력
   utcStr = f"UTC+{utc_hour}:00" if utc_hour>=0 else f"UTC{utc_hour}:00"
@@ -90,11 +91,15 @@ async def setUtcHour(interaction: discord.Interaction, utc_hour: int):
 @bot.tree.command(name="limit")
 @app_commands.describe(time_limit ="체크인 제한 시간(hh:mm 형식 | ex.05:30)")
 async def setTimeLimit(interaction: discord.Interaction, time_limit:str):
+  userId = str(interaction.user.id)
+  userName = interaction.user.display_name
+  #미등록 멤버 제한
+  if userId not in mem_dic : 
+    return await interaction.response.send_message(f"{userName} 님, 먼저 멤버 등록을 해주세요. 채팅창에 `!new`를 입력해보세요.")
   #시간 입력값 형식 체크
   errTime = checkVal("time", time_limit)
   if errTime :
     return await interaction.response.send_message(errTime)
-  userId = str(interaction.user.id)
   mem_dic[userId]["time_limit"] = time_limit
   await interaction.response.send_message(f"TimeLimit Setting Completed : {time_limit}")
   print("[setTimeLimit]", mem_dic[userId]["time_limit"])
@@ -102,6 +107,11 @@ async def setTimeLimit(interaction: discord.Interaction, time_limit:str):
 @bot.tree.command(name="set")
 @app_commands.describe(day_num="현재 누적 일수", date="마지막 체크인 날짜(yy-mm-dd 형식 | ex.23-01-15)", time ="마지막 체크인 시간(hh:mm 형식 | ex.05:30)")
 async def setUser(interaction: discord.Interaction, day_num: int, date:str, time:str):
+  userId = str(interaction.user.id)
+  userName = interaction.user.display_name
+  #미등록 멤버 제한
+  if userId not in mem_dic :
+    return await interaction.response.send_message(f"{userName} 님, 먼저 멤버 등록을 해주세요. 채팅창에 `!new`를 입력해보세요.")
   #일수 입력값 형식 체크
   if day_num < 0 : 
     return await interaction.response.send_message(f"{day_num}(X) 양수 값을 입력해주세요.")
@@ -114,13 +124,10 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
   if errTime :
     return await interaction.response.send_message(errTime)
   #체크인 설정값 저장 및 출력
-  userId = str(interaction.user.id)
-  userName = interaction.user.display_name
   if userId=='941581845194240001':
     day_num = -1
   medal = getMedal(day_num)
   #utc_hour 지워지지 않도록 변경된 값만 수정
-  if userId not in mem_dic : mem_dic[userId] = {"user_name" : userName}
   mem_dic[userId]["checkIn_days"]= day_num
   mem_dic[userId]["checkIn_date"]= date
   mem_dic[userId]["checkIn_time"]=time
@@ -134,9 +141,9 @@ async def setUser(interaction: discord.Interaction, day_num: int, date:str, time
 async def checkIn(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
-  #새 멤버 추가
-  if userId not in mem_dic:
-    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
+  #미등록 멤버 제한
+  if userId not in mem_dic :
+    return await interaction.response.send_message(f"{userName} 님, 먼저 멤버 등록을 해주세요. 채팅창에 `!new`를 입력해보세요.")
   #중복 출첵 막기
   cur_date = getDate()
   if mem_dic[userId]["checkIn_date"] == cur_date : 
@@ -181,9 +188,12 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
 async def checkOut(interaction: discord.Interaction, time: str = None):
   userId = str(interaction.user.id)
   userName = interaction.user.display_name
+  #미등록 멤버 제한
+  if userId not in mem_dic :
+    return await interaction.response.send_message(f"{userName} 님, 먼저 멤버 등록을 해주세요. 채팅창에 `!new`를 입력해보세요.")
   #오늘 체크인 데이터 없는 사람 거르기
   cur_date = getDate()
-  if userId not in mem_dic or (userId in mem_dic and mem_dic[userId]["checkIn_date"]!=cur_date) :
+  if mem_dic[userId]["checkIn_date"]!=cur_date :
     return await interaction.response.send_message(f"{userName} 님, 먼저 체크인을 해주세요.")
   #시간 자동 생성(해외 체크) or 수동 입력(형식 체크)
   if time == None:
@@ -214,6 +224,17 @@ async def member(ctx):
 async def today(ctx):
   todayStr = getToday(mem_dic)[0]
   await ctx.send("순위 | 시간 | 이름(누적일)\n\n"+todayStr)
+
+####멤버 등록 명령어
+@bot.command()
+async def new(ctx):
+  userId = str(ctx.author.id)
+  userName = ctx.author.display_name
+  if userId not in mem_dic : 
+    mem_dic[userId] = {"user_name" : userName,"checkIn_days": 0, "checkIn_date":"00-00-00", "checkIn_time":"00-00", "medal" : ""}
+    return await ctx.send(f"{userName} 님, 멤버 등록이 완료되었습니다. 환영합니다! :blush:")
+  else :
+    return await ctx.send(f"{userName} 님은 이미 등록된 멤버입니다.")
 
 ####관리자 전용 명령어
 @bot.command()
