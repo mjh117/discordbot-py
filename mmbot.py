@@ -35,7 +35,7 @@ async def dailyReport():
   reportStr = "Hello, I'm MMBot!\n"
   reportStr+= "> \n**----:robot:Today's Daily Report:robot:----**\n"
   reportStr+= f"등록 멤버({len(mem_dic):02d}) | 출석 멤버({todayMem:02d})\n"
-  reportStr+= f"신규 멤버({newMem:02d}) | 상장 멤버({newMedal:02d})"
+  reportStr+= f"신규 멤버({newMem:02d}) | 승급 멤버({newMedal:02d})"
   await message_channel.send(reportStr)
   await message_channel.send("> \n"+memberStr)
   await message_channel.send("> \n"+todayStr)
@@ -175,7 +175,7 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
   #특정 유저 처리
   if userId== '941581845194240001':
     mem_dic[userId]["checkIn_days"] = -1
-  #새 멤버 메달 지정 및 상장 수여자 메달 변경
+  #새 멤버 메달 지정 및 승급 메달 변경
   day_num = mem_dic[userId]["checkIn_days"]
   celebrateStr=""
   if(day_num==1 or day_num==10 or day_num==30 or day_num==66) :
@@ -183,9 +183,9 @@ async def checkIn(interaction: discord.Interaction, time: str = None):
     if day_num==1 :
       celebrateStr=f"\n**|** *어서오세요! {userName} 님의 첫 시작을 응원합니다* :shamrock: **|**"
     else : 
-      mentionStr = f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
-      celebrateStr = f"\n**|** *{day_num}일 차 상장러 대탄생! 축하합니다* :tada: **|**"+mentionStr
-      celebrateStr += "\n**|** *영문 이름&이미지를 답장으로 달아주세요* :blush: **|**"
+      #mentionStr = f"{discord.utils.get(interaction.guild.members, display_name='Key').mention}"
+      celebrateStr = f"\n**|** *{day_num}일 차 승급러 대탄생! 축하합니다* :tada: **|**"#+mentionStr
+      #celebrateStr += "\n**|** *영문 이름&이미지를 답장으로 달아주세요* :blush: **|**"
   #체크인 정보 출력
   medal = mem_dic[userId]["medal"]
   await interaction.response.send_message(f"{medal} {userName} in `{time}` {abs(day_num)}일 차 ({cur_date}){celebrateStr}")
